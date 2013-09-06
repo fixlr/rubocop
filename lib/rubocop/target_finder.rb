@@ -24,7 +24,7 @@ module Rubocop
         elsif arg.include?('*')
           files += Dir[arg]
         else
-          files << arg
+          files << arg unless @config_store.for(arg).file_to_exclude?(arg)
         end
       end
 

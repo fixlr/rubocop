@@ -67,6 +67,21 @@ module Rubocop
         end
       end
 
+      context 'when an excluded file is passed' do
+        let(:args) { ['dir1/ruby2.rb'] }
+
+        it 'does not pick the file' do
+          config = double('config').as_null_object
+          config.stub(:file_to_include?).and_return(false)
+          config.stub(:file_to_exclude?) do |file|
+            File.basename(file) == 'ruby2.rb'
+          end
+          config_store.stub(:for).and_return(config)
+
+          expect(found_basenames).to eq([])
+        end
+      end
+
       context 'when a pattern is passed' do
         let(:args) { ['dir1/*2.rb'] }
 
@@ -81,6 +96,21 @@ module Rubocop
         it 'does not return duplicated file paths' do
           count = found_basenames.count { |f| f == 'ruby1.rb' }
           expect(count).to eq(1)
+        end
+      end
+
+      context 'when an excluded path is passed' do
+        let(:args) { %w(dir2 dir1/ruby2.rb) }
+
+        it 'does not return the excluded paths' do
+          config = double('config').as_null_object
+          config.stub(:file_to_include?).and_return(false)
+          config.stub(:file_to_exclude?) do |file|
+            File.basename(file) == 'ruby2.rb'
+          end
+          config_store.stub(:for).and_return(config)
+
+          expect(found_basenames).to eq(['ruby3.rb'])
         end
       end
     end
